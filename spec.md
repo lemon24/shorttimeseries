@@ -12,6 +12,10 @@ Format
 A time series is composed of a whitespace-separated stream of timestamps.
 Each timestamp may be followed by an optional, user-defined label.
 
+    short-time-series   = *whitespace
+                          full-timestamp *( whitespace full-timestamp )
+                          *whitespace
+
 
 ### Timestamps
 
