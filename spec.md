@@ -54,6 +54,13 @@ and underscore. The number sign is not considered part of the label. If the
 number sign and label are missing, the label is a zero-length string.
 
 
+### Whitespace
+
+Timestamps are separated by one or more ASCII white space characters:
+
+    whitespace          = 1*( SP / HTAB / LF / CR / %x0B / %x0C )
+
+
 
 [rfc-3339-format]: https://tools.ietf.org/html/rfc3339#section-5.6
 [rfc-3339-restrictions]: https://tools.ietf.org/html/rfc3339#section-5.7
