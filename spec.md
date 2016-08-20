@@ -45,9 +45,6 @@ Timestamps are not time zone aware (i.e. there is no `time-offset` part). All
 other RFC 3339 [restrictions][rfc-3339-restrictions] apply.
 
 There are currently four precisions: `day`, `hour`, `minute`, and `second`.
-Higher (sub-second) precisions may be added in future versions of this
-specification.
-
 All timestamps in a series must have the same precision.
 
 Timestamps may be followed by a number sign ("#") and an optional label. When
