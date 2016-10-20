@@ -1,5 +1,6 @@
 import re
 from collections import namedtuple
+from datetime import datetime, timedelta
 
 from ._compat import text_type, bytes
 from .utils import split_stream
@@ -82,6 +83,7 @@ def fill_partial(timestamps, initial=None):
         have_values = False
         replace_rest = False
         replace_zero = False
+        carry = None
 
         for i, part in enumerate(ts):
             first_value = False
@@ -113,10 +115,11 @@ def fill_partial(timestamps, initial=None):
                 replace_rest = True
                 continue
 
-            if part < initial:
+            if part < initial[i]:
                 if first_value:
                     new_ts.append(part)
                     replace_zero = True
+                    carry = i
                     # FIXME: new_ts[-1] += 1 # carry one
                 else:
                     raise ValueError("can't go backwards: {}, index {}".format(ts, i))
@@ -124,6 +127,27 @@ def fill_partial(timestamps, initial=None):
                 continue
 
             assert False, "shouldn't get here"
+
+        if carry == 0:
+            assert False, "shouldn't get here" # because it would be first_value
+        elif carry == 1:
+            new_ts[0] = new_ts[0] + 1
+        elif carry == 2:
+            if new_ts[1] < 12:
+                new_ts[1] = new_ts[1] + 1
+            else:
+                new_ts[1] = 0
+                new_ts[0] = new_ts[0] + 1
+        elif carry is not None:
+            if carry == 3:
+                delta = timedelta(days=1)
+            elif carry == 4:
+                delta = timedelta(hours=1)
+            elif carry == 5:
+                delta = timedelta(minutes=1)
+            else:
+                assert False, "shouldn't get here"
+            new_ts = (datetime(*new_ts) + delta).timetuple()[0:6]
 
         yield Timestamp(*new_ts), label
 

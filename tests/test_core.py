@@ -20,9 +20,12 @@ def test_parse_partial():
 
 fill_partial_data = [
     ([Timestamp(2000, 1, 1, 0, 0, 0), Timestamp(None, None, None, None, 1, 0)],
-     [Timestamp(2000, 1, 1, 0, 0, 0), Timestamp(2000, 1, 1, 0, 1, 0)]),
-    ([Timestamp(2000, 1, 1, 0, 0, 0), Timestamp(None, None, None, None, 1, None)],
-     [Timestamp(2000, 1, 1, 0, 0, 0), Timestamp(2000, 1, 1, 0, 1, 0)]),
+        [Timestamp(2000, 1, 1, 0, 0, 0), Timestamp(2000, 1, 1, 0, 1, 0)]),
+    pytest.mark.xfail((
+        [Timestamp(2000, 1, 1, 0, 0, 0), Timestamp(None, None, None, None, 1, None)],
+        [Timestamp(2000, 1, 1, 0, 0, 0), Timestamp(2000, 1, 1, 0, 1, 0)])),
+    ([Timestamp(2000, 1, 1, 0, 2, 0), Timestamp(None, None, None, None, 1, 0)],
+        [Timestamp(2000, 1, 1, 0, 2, 0), Timestamp(2000, 1, 1, 1, 1, 0)]),
 ]
 
 
