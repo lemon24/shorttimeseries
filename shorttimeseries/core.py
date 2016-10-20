@@ -65,3 +65,66 @@ def parse_partial(file, precision):
 
         yield ts, label
 
+
+def fill_partial(timestamps, initial=None):
+    timestamps = iter(timestamps)
+    if not initial:
+        initial, label = next(timestamps)
+        yield initial, label
+
+    # TODO: initial shouldn't have gaps
+    # TODO: initial might need to be padded with zeroes if < full precision
+
+    for ts, label in timestamps:
+
+        new_ts = []
+
+        have_values = False
+        replace_rest = False
+        replace_zero = False
+
+        for i, part in enumerate(ts):
+            first_value = False
+
+            if part is None:
+                if have_values:
+                    raise ValueError("can't have gaps: {}, index {}".format(ts, i))
+                part = initial[i]
+            else:
+                first_value = not have_values
+                have_values = True
+
+            assert bool(replace_rest) + bool(replace_zero) <= 1
+
+            if replace_rest:
+                new_ts.append(part)
+                continue
+
+            if replace_zero:
+                new_ts.append(1 if i <= 2 else 0) # "zero" is 1 for months/days
+                continue
+
+            if part == initial[i]:
+                new_ts.append(part)
+                continue
+
+            if part > initial[i]:
+                new_ts.append(part)
+                replace_rest = True
+                continue
+
+            if part < initial:
+                if first_value:
+                    new_ts.append(part)
+                    replace_zero = True
+                    # FIXME: new_ts[-1] += 1 # carry one
+                else:
+                    raise ValueError("can't go backwards: {}, index {}".format(ts, i))
+                    # TODO: what do if you *can* go backwards? replace_rest?
+                continue
+
+            assert False, "shouldn't get here"
+
+        yield Timestamp(*new_ts), label
+
+
