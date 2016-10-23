@@ -75,14 +75,29 @@ def fill_partial(timestamps, initial=None):
     timestamps = iter(timestamps)
     if not initial:
         initial, label = next(timestamps)
+        initial = pad_timestamp(initial)
         yield initial, label
+    else:
+        initial = pad_timestamp(initial)
 
     # TODO: initial shouldn't have gaps
-    # TODO: initial might need to be padded with zeroes if < full precision
 
     for timestamp, label in timestamps:
-        timestamp = initial = fill_timestamp(initial, timestamp)
+        timestamp = initial = fill_timestamp(initial, pad_timestamp(timestamp))
         yield timestamp, label
+
+
+def pad_timestamp(timestamp):
+    default = Timestamp(0, 1, 1, 0, 0, 0)
+    x = []
+    it = reversed(list(zip(timestamp, default)))
+    for p, d in it:
+        if p is not None:
+            x.append(p)
+            break
+        x.append(d)
+    x.extend(p for p, _ in it)
+    return Timestamp(*reversed(x))
 
 
 def fill_timestamp(initial, timestamp):
