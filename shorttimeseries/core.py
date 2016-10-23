@@ -76,79 +76,81 @@ def fill_partial(timestamps, initial=None):
     # TODO: initial shouldn't have gaps
     # TODO: initial might need to be padded with zeroes if < full precision
 
-    for ts, label in timestamps:
+    for timestamp, label in timestamps:
+        timestamp = initial = fill_timestamp(initial, timestamp)
+        yield timestamp, label
 
-        new_ts = []
 
-        have_values = False
-        replace_rest = False
-        replace_zero = False
-        carry = None
+def fill_timestamp(initial, timestamp):
+    parts = []
 
-        for i, part in enumerate(ts):
-            first_value = False
+    have_values = False
+    replace_rest = False
+    replace_zero = False
+    carry = None
 
-            if part is None:
-                if have_values:
-                    raise ValueError("can't have gaps: {}, index {}".format(ts, i))
-                part = initial[i]
+    for i, part in enumerate(timestamp):
+        first_value = False
+
+        if part is None:
+            if have_values:
+                raise ValueError("can't have gaps: {}, index {}".format(timestamp, i))
+            part = initial[i]
+        else:
+            first_value = not have_values
+            have_values = True
+
+        assert bool(replace_rest) + bool(replace_zero) <= 1
+
+        if replace_rest:
+            parts.append(part)
+            continue
+
+        if replace_zero:
+            parts.append(1 if i <= 2 else 0) # "zero" is 1 for months/days
+            continue
+
+        if part == initial[i]:
+            parts.append(part)
+            continue
+
+        if part > initial[i]:
+            parts.append(part)
+            replace_rest = True
+            continue
+
+        if part < initial[i]:
+            if first_value:
+                parts.append(part)
+                replace_zero = True
+                carry = i
             else:
-                first_value = not have_values
-                have_values = True
+                raise ValueError("can't go backwards: {}, index {}".format(timestamp, i))
+                # TODO: what do if you *can* go backwards? replace_rest?
+            continue
 
-            assert bool(replace_rest) + bool(replace_zero) <= 1
+        assert False, "shouldn't get here"
 
-            if replace_rest:
-                new_ts.append(part)
-                continue
-
-            if replace_zero:
-                new_ts.append(1 if i <= 2 else 0) # "zero" is 1 for months/days
-                continue
-
-            if part == initial[i]:
-                new_ts.append(part)
-                continue
-
-            if part > initial[i]:
-                new_ts.append(part)
-                replace_rest = True
-                continue
-
-            if part < initial[i]:
-                if first_value:
-                    new_ts.append(part)
-                    replace_zero = True
-                    carry = i
-                    # FIXME: new_ts[-1] += 1 # carry one
-                else:
-                    raise ValueError("can't go backwards: {}, index {}".format(ts, i))
-                    # TODO: what do if you *can* go backwards? replace_rest?
-                continue
-
+    if carry == 0:
+        assert False, "shouldn't get here" # because it would be first_value
+    elif carry == 1:
+        parts[0] = parts[0] + 1
+    elif carry == 2:
+        if parts[1] < 12:
+            parts[1] = parts[1] + 1
+        else:
+            parts[1] = 0
+            parts[0] = parts[0] + 1
+    elif carry is not None:
+        if carry == 3:
+            delta = timedelta(days=1)
+        elif carry == 4:
+            delta = timedelta(hours=1)
+        elif carry == 5:
+            delta = timedelta(minutes=1)
+        else:
             assert False, "shouldn't get here"
+        parts = (datetime(*parts) + delta).timetuple()[0:6]
 
-        if carry == 0:
-            assert False, "shouldn't get here" # because it would be first_value
-        elif carry == 1:
-            new_ts[0] = new_ts[0] + 1
-        elif carry == 2:
-            if new_ts[1] < 12:
-                new_ts[1] = new_ts[1] + 1
-            else:
-                new_ts[1] = 0
-                new_ts[0] = new_ts[0] + 1
-        elif carry is not None:
-            if carry == 3:
-                delta = timedelta(days=1)
-            elif carry == 4:
-                delta = timedelta(hours=1)
-            elif carry == 5:
-                delta = timedelta(minutes=1)
-            else:
-                assert False, "shouldn't get here"
-            new_ts = (datetime(*new_ts) + delta).timetuple()[0:6]
-
-        yield Timestamp(*new_ts), label
-
+    return Timestamp(*parts)
 
