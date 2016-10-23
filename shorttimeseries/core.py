@@ -6,6 +6,10 @@ from ._compat import text_type, bytes
 from .utils import split_stream
 
 Timestamp = namedtuple('Timestamp', 'year month day hour minute second')
+class Timestamp(Timestamp):
+    __slots__ = ()
+    def __new__(cls, year=None, month=None, day=None, hour=None, minute=None, second=None):
+        return super(Timestamp, cls).__new__(cls, year, month, day, hour, minute, second)
 
 
 WHITESPACE_RE = re.compile(r'[ \t\n\r\x0b\x0c]+')
