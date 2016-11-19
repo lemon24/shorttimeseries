@@ -15,7 +15,6 @@ class Timestamp(Timestamp):
 WHITESPACE_RE = re.compile(r'[ \t\n\r\x0b\x0c]+')
 WHITESPACE_BYTES_RE = re.compile(WHITESPACE_RE.pattern.encode('utf-8'))
 
-# Alternatively, r'^([0-9]+)|([0-9]*)#([a-zA-Z0-9_-]*)$' ?
 TIMESTAMP_RE = re.compile(r'^([0-9]+|[0-9]*(?=#))(?:#([a-zA-Z0-9_-]*))?$')
 TIMESTAMP_BYTES_RE = re.compile(TIMESTAMP_RE.pattern.encode('utf-8'))
 
