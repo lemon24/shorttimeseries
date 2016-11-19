@@ -35,8 +35,8 @@ fill_timestamp_data = [
     (initial, Timestamp(day=1), Timestamp(2000, 3, 1, 0, 0, 0)),
     (initial, Timestamp(month=1), Timestamp(2001, 1, 1, 0, 0, 0)),
     pytest.mark.xfail(
-        (initial, Timestamp(year=1999), Timestamp(1999, 1, 1, 0, 0, 0)),
-        raises=AssertionError), # FIXME: should be ValueError("can't go backwards")
+        (initial, Timestamp(year=1999), Timestamp()),
+        raises=ValueError, strict=True), # can't go backwards
 
     # rollover (e.g. initial minute=59,second=2 and input second=1)
     (initial._replace(minute=59), Timestamp(second=1), Timestamp(2000, 2, 2, 3, 0, 1)),

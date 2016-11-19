@@ -139,7 +139,7 @@ def fill_timestamp(initial, timestamp):
             continue
 
         if part < initial[i]:
-            if first_value:
+            if first_value and i > 0:
                 parts.append(part)
                 replace_zero = True
                 carry = i
