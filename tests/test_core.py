@@ -18,23 +18,23 @@ def test_parse_partial():
     ]
 
 
-fill_timestamp_initial = Timestamp(2000, 2, 2, 2, 2, 2)
+initial = Timestamp(2000, 2, 2, 2, 2, 2)
 
 fill_timestamp_data = [
-    (Timestamp(second=3), Timestamp(2000, 2, 2, 2, 2, 3)),
-    (Timestamp(minute=3), Timestamp(2000, 2, 2, 2, 3, 0)),
-    (Timestamp(hour=3), Timestamp(2000, 2, 2, 3, 0, 0)),
-    (Timestamp(day=3), Timestamp(2000, 2, 3, 0, 0, 0)),
-    (Timestamp(month=3), Timestamp(2000, 3, 1, 0, 0, 0)),
-    (Timestamp(year=3000), Timestamp(3000, 1, 1, 0, 0, 0)),
+    (initial, Timestamp(second=3), Timestamp(2000, 2, 2, 2, 2, 3)),
+    (initial, Timestamp(minute=3), Timestamp(2000, 2, 2, 2, 3, 0)),
+    (initial, Timestamp(hour=3), Timestamp(2000, 2, 2, 3, 0, 0)),
+    (initial, Timestamp(day=3), Timestamp(2000, 2, 3, 0, 0, 0)),
+    (initial, Timestamp(month=3), Timestamp(2000, 3, 1, 0, 0, 0)),
+    (initial, Timestamp(year=3000), Timestamp(3000, 1, 1, 0, 0, 0)),
 
-    (Timestamp(second=1), Timestamp(2000, 2, 2, 2, 3, 1)),
-    (Timestamp(minute=1), Timestamp(2000, 2, 2, 3, 1, 0)),
-    (Timestamp(hour=1), Timestamp(2000, 2, 3, 1, 0, 0)),
-    (Timestamp(day=1), Timestamp(2000, 3, 1, 0, 0, 0)),
-    (Timestamp(month=1), Timestamp(2001, 1, 1, 0, 0, 0)),
+    (initial, Timestamp(second=1), Timestamp(2000, 2, 2, 2, 3, 1)),
+    (initial, Timestamp(minute=1), Timestamp(2000, 2, 2, 3, 1, 0)),
+    (initial, Timestamp(hour=1), Timestamp(2000, 2, 3, 1, 0, 0)),
+    (initial, Timestamp(day=1), Timestamp(2000, 3, 1, 0, 0, 0)),
+    (initial, Timestamp(month=1), Timestamp(2001, 1, 1, 0, 0, 0)),
     pytest.mark.xfail(
-        (Timestamp(year=1999), Timestamp(1999, 1, 1, 0, 0, 0)),
+        (initial, Timestamp(year=1999), Timestamp(1999, 1, 1, 0, 0, 0)),
         raises=AssertionError), # FIXME: should be ValueError("can't go backwards")
 
     # TODO: test rollover (e.g. initial minute=59,second=2 and input second=1)
@@ -42,7 +42,7 @@ fill_timestamp_data = [
 ]
 
 
-@pytest.mark.parametrize('input, expected', fill_timestamp_data)
-def test_fill_timestamp(input, expected):
-    assert fill_timestamp(fill_timestamp_initial, pad_timestamp(input)) == expected
+@pytest.mark.parametrize('initial, input, expected', fill_timestamp_data)
+def test_fill_timestamp(initial, input, expected):
+    assert fill_timestamp(initial, pad_timestamp(input)) == expected
 
