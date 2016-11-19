@@ -18,6 +18,22 @@ def test_parse_partial():
     ]
 
 
+pad_timestamp_data = [
+    (Timestamp(year=2000), Timestamp(2000, 1, 1, 0, 0, 0)),
+    (Timestamp(month=2), Timestamp(None, 2, 1, 0, 0, 0)),
+    (Timestamp(day=2), Timestamp(None, None, 2, 0, 0, 0)),
+    (Timestamp(hour=2), Timestamp(None, None, None, 2, 0, 0)),
+    (Timestamp(minute=2), Timestamp(None, None, None, None, 2, 0)),
+    (Timestamp(second=2), Timestamp(None, None, None, None, None, 2)),
+    pytest.mark.xfail((Timestamp(), Timestamp(None, None, None, None, None, None))),
+]
+
+
+@pytest.mark.parametrize('input, expected', pad_timestamp_data)
+def test_pad_timestamp(input, expected):
+    assert pad_timestamp(input) == expected
+
+
 initial = Timestamp(2000, 2, 2, 2, 2, 2)
 initial_last = Timestamp(2000, 12, 31, 23, 59, 59)
 
