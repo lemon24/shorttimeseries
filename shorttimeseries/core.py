@@ -88,15 +88,14 @@ def fill_partial(timestamps, initial=None):
 
 def pad_timestamp(timestamp):
     default = Timestamp(0, 1, 1, 0, 0, 0)
-    x = []
-    it = reversed(list(zip(timestamp, default)))
-    for p, d in it:
-        if p is not None:
-            x.append(p)
+    new_timestamp = list(timestamp)
+    for i in range(len(timestamp) - 1, -1, -1):
+        if new_timestamp[i] is not None:
             break
-        x.append(d)
-    x.extend(p for p, _ in it)
-    return Timestamp(*reversed(x))
+        new_timestamp[i] = default[i]
+    else:
+        new_timestamp = timestamp
+    return Timestamp(*new_timestamp)
 
 
 def fill_timestamp(initial, timestamp):

@@ -25,7 +25,7 @@ pad_timestamp_data = [
     (Timestamp(hour=2), Timestamp(None, None, None, 2, 0, 0)),
     (Timestamp(minute=2), Timestamp(None, None, None, None, 2, 0)),
     (Timestamp(second=2), Timestamp(None, None, None, None, None, 2)),
-    pytest.mark.xfail((Timestamp(), Timestamp(None, None, None, None, None, None))),
+    (Timestamp(), Timestamp(None, None, None, None, None, None)),
 ]
 
 
