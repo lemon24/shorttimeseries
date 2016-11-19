@@ -19,6 +19,7 @@ def test_parse_partial():
 
 
 initial = Timestamp(2000, 2, 2, 2, 2, 2)
+initial_last = Timestamp(2000, 12, 31, 23, 59, 59)
 
 fill_timestamp_data = [
     (initial, Timestamp(second=3), Timestamp(2000, 2, 2, 2, 2, 3)),
@@ -37,7 +38,18 @@ fill_timestamp_data = [
         (initial, Timestamp(year=1999), Timestamp(1999, 1, 1, 0, 0, 0)),
         raises=AssertionError), # FIXME: should be ValueError("can't go backwards")
 
-    # TODO: test rollover (e.g. initial minute=59,second=2 and input second=1)
+    # rollover (e.g. initial minute=59,second=2 and input second=1)
+    (initial._replace(minute=59), Timestamp(second=1), Timestamp(2000, 2, 2, 3, 0, 1)),
+    (initial._replace(hour=23), Timestamp(minute=1), Timestamp(2000, 2, 3, 0, 1, 0)),
+    (initial._replace(day=29), Timestamp(hour=1), Timestamp(2000, 3, 1, 1, 0, 0)),
+    pytest.mark.xfail((initial._replace(month=12), Timestamp(day=1), Timestamp(2001, 1, 1, 0, 0, 0))),
+    (initial_last, Timestamp(second=1), Timestamp(2001, 1, 1, 0, 0, 1)),
+    (initial_last, Timestamp(minute=1), Timestamp(2001, 1, 1, 0, 1, 0)),
+    (initial_last, Timestamp(hour=1), Timestamp(2001, 1, 1, 1, 0, 0)),
+
+    pytest.mark.xfail(
+        (initial._replace(year=2001, day=29), Timestamp(hour=1), Timestamp()),
+        raises=ValueError),     # FIXME: wrap the exception from datetime
 
 ]
 
