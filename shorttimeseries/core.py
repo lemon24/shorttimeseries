@@ -158,7 +158,7 @@ def fill_timestamp(initial, timestamp):
         if parts[1] < 12:
             parts[1] = parts[1] + 1
         else:
-            parts[1] = 0
+            parts[1] = 1 # months start with 1
             parts[0] = parts[0] + 1
     elif carry is not None:
         if carry == 3:

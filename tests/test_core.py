@@ -42,7 +42,7 @@ fill_timestamp_data = [
     (initial._replace(minute=59), Timestamp(second=1), Timestamp(2000, 2, 2, 3, 0, 1)),
     (initial._replace(hour=23), Timestamp(minute=1), Timestamp(2000, 2, 3, 0, 1, 0)),
     (initial._replace(day=29), Timestamp(hour=1), Timestamp(2000, 3, 1, 1, 0, 0)),
-    pytest.mark.xfail((initial._replace(month=12), Timestamp(day=1), Timestamp(2001, 1, 1, 0, 0, 0))),
+    (initial._replace(month=12), Timestamp(day=1), Timestamp(2001, 1, 1, 0, 0, 0)),
     (initial_last, Timestamp(second=1), Timestamp(2001, 1, 1, 0, 0, 1)),
     (initial_last, Timestamp(minute=1), Timestamp(2001, 1, 1, 0, 1, 0)),
     (initial_last, Timestamp(hour=1), Timestamp(2001, 1, 1, 1, 0, 0)),
