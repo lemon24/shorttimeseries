@@ -1,11 +1,9 @@
 import itertools
 
-from ._compat import text_type, bytes
-
 
 def split_stream(file, pattern, buffer_size=16*1024):
     """Streaming version of re.split()."""
-    empty = bytes() if isinstance(file.read(0), bytes) else text_type()
+    empty = file.read(0)
 
     chunks = []
     while True:

@@ -50,14 +50,13 @@ SLICES = {
 
 
 def parse_partial(file, precision):
-    if isinstance(file.read(0), bytes):
+    empty = file.read(0)
+    if isinstance(empty, bytes):
         whitespace_re = WHITESPACE_BYTES_RE
         timestamp_re = TIMESTAMP_BYTES_RE
-        empty = bytes()
     else:
         whitespace_re = WHITESPACE_RE
         timestamp_re = TIMESTAMP_RE
-        empty = text_type()
 
     if precision not in SLICES:
         raise ValueError("precision must be one of {!r}".format(tuple(sorted(SLICES))))
