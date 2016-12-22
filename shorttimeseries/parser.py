@@ -86,7 +86,7 @@ def parse(file, precision='minute', initial=None):
         initial = pad_timestamp(initial)
         yield datetime(*initial), label
     else:
-        initial = pad_timestamp(initial)
+        initial = pad_timestamp(initial.timetuple()[0:6])
 
     # TODO: initial shouldn't have gaps
 
