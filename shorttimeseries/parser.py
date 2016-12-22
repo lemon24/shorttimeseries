@@ -58,6 +58,9 @@ def parse_partial(file, precision):
         whitespace_re = WHITESPACE_RE
         timestamp_re = TIMESTAMP_RE
         empty = text_type()
+
+    if precision not in SLICES:
+        raise ValueError("precision must be one of {!r}".format(tuple(sorted(SLICES))))
     slices = SLICES[precision]
 
     for text in split_stream(file, whitespace_re):
