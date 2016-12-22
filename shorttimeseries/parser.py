@@ -42,10 +42,10 @@ def make_slices(length):
         yield slice(0, 0)
 
 SLICES = {
-    'day': Timestamp(*make_slices(3)),
-    'hour': Timestamp(*make_slices(4)),
-    'minute': Timestamp(*make_slices(5)),
-    'second': Timestamp(*make_slices(6)),
+    'day': Timestamp._make(make_slices(3)),
+    'hour': Timestamp._make(make_slices(4)),
+    'minute': Timestamp._make(make_slices(5)),
+    'second': Timestamp._make(make_slices(6)),
 }
 
 
@@ -68,7 +68,7 @@ def parse_partial(file, precision):
             raise ValueError("bad timestamp: %r" % text)
         ts, label = match.groups(empty)
 
-        ts = Timestamp(*[int(ts[s]) if ts[s] else None for s in slices])
+        ts = Timestamp._make(int(ts[s]) if ts[s] else None for s in slices)
 
         yield ts, label
 
@@ -104,7 +104,7 @@ def pad_timestamp(timestamp):
         new_timestamp[i] = default[i]
     else:
         new_timestamp = timestamp
-    return Timestamp(*new_timestamp)
+    return Timestamp._make(new_timestamp)
 
 
 def fill_timestamp(initial, timestamp):
@@ -178,5 +178,5 @@ def fill_timestamp(initial, timestamp):
             assert False, "shouldn't get here"
         parts = (datetime(*parts) + delta).timetuple()[0:6]
 
-    return Timestamp(*parts)
+    return Timestamp._make(parts)
 
