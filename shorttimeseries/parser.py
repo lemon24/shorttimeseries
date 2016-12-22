@@ -13,9 +13,6 @@ class Timestamp(Timestamp):
         return super(Timestamp, cls).__new__(cls, year, month, day, hour, minute, second)
 
 
-WHITESPACE_RE = re.compile(r'[ \t\n\r\x0b\x0c]+')
-WHITESPACE_BYTES_RE = re.compile(WHITESPACE_RE.pattern.encode('utf-8'))
-
 TIMESTAMP_RE = re.compile(r'^([0-9]+|[0-9]*(?=#))(?:#([a-zA-Z0-9_-]*))?$')
 TIMESTAMP_BYTES_RE = re.compile(TIMESTAMP_RE.pattern.encode('utf-8'))
 
@@ -57,17 +54,15 @@ def parse_partial(file, precision):
 
     empty = file.read(0)
     if isinstance(empty, bytes):
-        whitespace_re = WHITESPACE_BYTES_RE
         timestamp_re = TIMESTAMP_BYTES_RE
     else:
-        whitespace_re = WHITESPACE_RE
         timestamp_re = TIMESTAMP_RE
 
     if precision not in SLICES:
         raise ValueError("precision must be one of {!r}".format(tuple(sorted(SLICES))))
     slices = SLICES[precision]
 
-    for text in split_stream(file, whitespace_re):
+    for text in split_stream(file):
         match = timestamp_re.match(text)
         if not match:
             raise ValueError("bad timestamp: %r" % text)

@@ -1,16 +1,28 @@
+import re
 import itertools
 
+from ._compat import text_type, bytes
 
-def split_stream(file, pattern, buffer_size=16*1024):
-    """Streaming version of re.split()."""
+
+WHITESPACE_RE = re.compile(r'[ \t\n\r\x0b\x0c]+')
+WHITESPACE_BYTES_RE = re.compile(WHITESPACE_RE.pattern.encode('utf-8'))
+
+
+def split_stream(file, buffer_size=16*1024):
+    """Split the contents of file using runs of whitespace as separator."""
+
     empty = file.read(0)
+    if isinstance(empty, bytes):
+        whitespace_re = WHITESPACE_BYTES_RE
+    else:
+        whitespace_re = WHITESPACE_RE
 
     chunks = []
     while True:
         buffer = file.read(buffer_size)
         if not buffer:
             break
-        parts = pattern.split(buffer)
+        parts = whitespace_re.split(buffer)
 
         if len(parts) == 1:
             chunks.append(parts[0])
