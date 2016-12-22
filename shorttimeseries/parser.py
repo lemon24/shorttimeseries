@@ -73,7 +73,7 @@ def parse_partial(file, precision):
         yield ts, label
 
 
-def parse(file, precision='minute', initial=None):
+def parse(file, initial=None, precision='minute'):
     if isinstance(file, text_type):
         file = io.StringIO(file)
     elif isinstance(file, bytes):
