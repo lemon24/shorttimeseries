@@ -4,7 +4,7 @@ import io
 import pytest
 
 from shorttimeseries.core import parse_partial, Timestamp
-from shorttimeseries.core import fill_partial, fill_timestamp, pad_timestamp
+from shorttimeseries.core import fill_timestamp, pad_timestamp
 
 
 def test_parse_partial():

@@ -1,4 +1,5 @@
 import re
+import io
 from collections import namedtuple
 from datetime import datetime, timedelta
 
@@ -70,12 +71,18 @@ def parse_partial(file, precision):
         yield ts, label
 
 
-def fill_partial(timestamps, initial=None):
-    timestamps = iter(timestamps)
+def parse(file, precision='minute', initial=None):
+    if isinstance(file, text_type):
+        file = io.StringIO(file)
+    elif isinstance(file, bytes):
+        file = io.BytesIO(file)
+
+    timestamps = parse_partial(file, precision)
+
     if not initial:
         initial, label = next(timestamps)
         initial = pad_timestamp(initial)
-        yield initial, label
+        yield datetime(*initial), label
     else:
         initial = pad_timestamp(initial)
 
@@ -83,7 +90,7 @@ def fill_partial(timestamps, initial=None):
 
     for timestamp, label in timestamps:
         timestamp = initial = fill_timestamp(initial, pad_timestamp(timestamp))
-        yield timestamp, label
+        yield datetime(*timestamp), label
 
 
 def pad_timestamp(timestamp):
