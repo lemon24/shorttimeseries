@@ -50,6 +50,11 @@ SLICES = {
 
 
 def parse_partial(file, precision):
+    if isinstance(file, text_type):
+        file = io.StringIO(file)
+    elif isinstance(file, bytes):
+        file = io.BytesIO(file)
+
     empty = file.read(0)
     if isinstance(empty, bytes):
         whitespace_re = WHITESPACE_BYTES_RE
@@ -74,10 +79,17 @@ def parse_partial(file, precision):
 
 
 def parse(file, initial=None, precision='minute'):
-    if isinstance(file, text_type):
-        file = io.StringIO(file)
-    elif isinstance(file, bytes):
-        file = io.BytesIO(file)
+    if initial:
+        if isinstance(initial, (text_type, bytes)):
+            initial = list(parse_partial(initial, precision))
+            if len(initial) != 1:
+                raise ValueError("bad initial: %r" % initial)
+            (initial, _), = initial
+            initial = pad_timestamp(initial)
+            if None in initial:
+                raise ValueError("initial is incomplete")
+        else:
+            initial = pad_timestamp(initial.timetuple()[0:6])
 
     timestamps = parse_partial(file, precision)
 
@@ -87,8 +99,6 @@ def parse(file, initial=None, precision='minute'):
         if None in initial:
             raise ValueError("the first timestamp is incomplete and initial not given")
         yield datetime(*initial), label
-    else:
-        initial = pad_timestamp(initial.timetuple()[0:6])
 
     for timestamp, label in timestamps:
         timestamp = initial = fill_timestamp(initial, pad_timestamp(timestamp))

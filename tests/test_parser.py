@@ -85,9 +85,14 @@ def test_parse():
     assert list(parse('1', initial=datetime(2000, 2, 2, 2, 2))) == [
         (datetime(2000, 2, 2, 3, 1), ''),
     ]
+    assert list(parse('1', initial='200002020202')) == [
+        (datetime(2000, 2, 2, 3, 1), ''),
+    ]
 
     with pytest.raises(ValueError):
         list(parse('1'))
+    with pytest.raises(ValueError):
+        list(parse('1', initial='2'))
 
     with pytest.raises(ValueError):
         list(parse('200002020202 1', precision='foo'))
