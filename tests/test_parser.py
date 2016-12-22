@@ -1,10 +1,12 @@
 from __future__ import unicode_literals
 import io
+from datetime import datetime
 
 import pytest
 
 from shorttimeseries.parser import parse_partial, Timestamp
 from shorttimeseries.parser import fill_timestamp, pad_timestamp
+from shorttimeseries.parser import parse
 
 
 def test_parse_partial():
@@ -73,4 +75,20 @@ fill_timestamp_data = [
 @pytest.mark.parametrize('initial, input, expected', fill_timestamp_data)
 def test_fill_timestamp(initial, input, expected):
     assert fill_timestamp(initial, pad_timestamp(input)) == expected
+
+
+def test_parse():
+    assert list(parse('200002020202 1')) == [
+        (datetime(2000, 2, 2, 2, 2), ''),
+        (datetime(2000, 2, 2, 3, 1), ''),
+    ]
+    assert list(parse('1', initial=datetime(2000, 2, 2, 2, 2))) == [
+        (datetime(2000, 2, 2, 3, 1), ''),
+    ]
+
+    with pytest.raises(ValueError):
+        list(parse('1'))
+
+    with pytest.raises(ValueError):
+        list(parse('200002020202 1', precision='foo'))
 
