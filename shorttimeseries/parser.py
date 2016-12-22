@@ -84,11 +84,11 @@ def parse(file, precision='minute', initial=None):
     if not initial:
         initial, label = next(timestamps)
         initial = pad_timestamp(initial)
+        if None in initial:
+            raise ValueError("the first timestamp is incomplete and initial not given")
         yield datetime(*initial), label
     else:
         initial = pad_timestamp(initial.timetuple()[0:6])
-
-    # TODO: initial shouldn't have gaps
 
     for timestamp, label in timestamps:
         timestamp = initial = fill_timestamp(initial, pad_timestamp(timestamp))
