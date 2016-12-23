@@ -6,11 +6,14 @@ from datetime import datetime, timedelta
 from ._compat import text_type, bytes
 from .utils import split_stream
 
+
 Timestamp = namedtuple('Timestamp', 'year month day hour minute second')
 class Timestamp(Timestamp):
     __slots__ = ()
     def __new__(cls, year=None, month=None, day=None, hour=None, minute=None, second=None):
         return super(Timestamp, cls).__new__(cls, year, month, day, hour, minute, second)
+
+FullTimestamp = namedtuple('FullTimestamp', 'timestamp label text')
 
 
 TIMESTAMP_RE = re.compile(r'^([0-9]+|[0-9]*(?=#))(?:#([a-zA-Z0-9_-]*))?$')
@@ -70,7 +73,7 @@ def parse_partial(file, precision):
 
         ts = Timestamp._make(int(ts[s]) if ts[s] else None for s in slices)
 
-        yield ts, label
+        yield FullTimestamp(ts, label, text)
 
 
 def parse(file, initial=None, precision='minute'):
@@ -79,8 +82,8 @@ def parse(file, initial=None, precision='minute'):
             initial = list(parse_partial(initial, precision))
             if len(initial) != 1:
                 raise ValueError("bad initial: %r" % initial)
-            (initial, _), = initial
-            initial = pad_timestamp(initial)
+            initial, = initial
+            initial = pad_timestamp(initial.timestamp)
             if None in initial:
                 raise ValueError("initial is incomplete")
         else:
@@ -89,15 +92,15 @@ def parse(file, initial=None, precision='minute'):
     timestamps = parse_partial(file, precision)
 
     if not initial:
-        initial, label = next(timestamps)
-        initial = pad_timestamp(initial)
+        ts = next(timestamps)
+        initial = pad_timestamp(ts.timestamp)
         if None in initial:
             raise ValueError("the first timestamp is incomplete and initial not given")
-        yield datetime(*initial), label
+        yield datetime(*initial), ts.label
 
-    for timestamp, label in timestamps:
-        timestamp = initial = fill_timestamp(initial, pad_timestamp(timestamp))
-        yield datetime(*timestamp), label
+    for ts in timestamps:
+        timestamp = initial = fill_timestamp(initial, pad_timestamp(ts.timestamp))
+        yield datetime(*timestamp), ts.label
 
 
 def pad_timestamp(timestamp):

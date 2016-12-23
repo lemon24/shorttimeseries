@@ -4,7 +4,7 @@ from datetime import datetime
 
 import pytest
 
-from shorttimeseries.parser import parse_partial, Timestamp
+from shorttimeseries.parser import parse_partial, Timestamp, FullTimestamp
 from shorttimeseries.parser import fill_timestamp, pad_timestamp
 from shorttimeseries.parser import parse
 
@@ -12,11 +12,11 @@ from shorttimeseries.parser import parse
 def test_parse_partial():
     file = io.StringIO("1 12# 123#one #two #")
     assert list(parse_partial(file, 'day')) == [
-        (Timestamp(None, None, 1, None, None, None), ''),
-        (Timestamp(None, None, 12, None, None, None), ''),
-        (Timestamp(None, 1, 23, None, None, None), 'one'),
-        (Timestamp(None, None, None, None, None, None), 'two'),
-        (Timestamp(None, None, None, None, None, None), ''),
+        FullTimestamp(Timestamp(None, None, 1, None, None, None), '', '1'),
+        FullTimestamp(Timestamp(None, None, 12, None, None, None), '', '12#'),
+        FullTimestamp(Timestamp(None, 1, 23, None, None, None), 'one', '123#one'),
+        FullTimestamp(Timestamp(None, None, None, None, None, None), 'two', '#two'),
+        FullTimestamp(Timestamp(None, None, None, None, None, None), '', '#'),
     ]
 
 
