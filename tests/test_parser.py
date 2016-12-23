@@ -6,7 +6,7 @@ import pytest
 
 from shorttimeseries.parser import parse_partial, Timestamp, FullTimestamp
 from shorttimeseries.parser import fill_timestamp, pad_timestamp
-from shorttimeseries.parser import parse
+from shorttimeseries.parser import parse, TimestampError
 
 
 def test_parse_partial():
@@ -71,7 +71,7 @@ def test_fill_timestamp(initial, input, expected):
 
 def test_fill_timestamp_errors():
     # can't go backwards
-    with pytest.raises(ValueError):
+    with pytest.raises(TimestampError):
         fill_timestamp(initial, pad_timestamp(Timestamp(year=1999)))
 
     # can't have gaps
@@ -79,7 +79,7 @@ def test_fill_timestamp_errors():
         fill_timestamp(initial, Timestamp(minute=1))
 
     # day is out of range for month (from datetime)
-    with pytest.raises(ValueError):
+    with pytest.raises(TimestampError):
         fill_timestamp(initial._replace(year=2001, day=29), pad_timestamp(Timestamp(hour=1)))
 
 
@@ -97,15 +97,52 @@ def test_parse():
 
 
 def test_parse_errors():
-    # the first timestamp is incomplete and initial not given
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError) as exc_info:
         list(parse('1'))
+    assert str(exc_info.value) == "initial not given and the first timestamp is incomplete: %r" % '1'
 
-    # initial is incomplete
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError) as exc_info:
+        list(parse('1', initial='-'))
+    assert str(exc_info.value) == "initial: invalid timestamp: %r" % '-'
+
+    with pytest.raises(ValueError) as exc_info:
+        list(parse('1', initial='1 2'))
+    assert str(exc_info.value) == "initial is not a valid timestamp: %r" % '1 2'
+
+    with pytest.raises(ValueError) as exc_info:
         list(parse('1', initial='2'))
+    assert str(exc_info.value) == "initial is incomplete: %r" % '2'
 
-    # precision must be one of
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError) as exc_info:
+        list(parse('1', initial=object()))
+    assert "initial is not a datetime object" in str(exc_info.value)
+
+    with pytest.raises(ValueError) as exc_info:
         list(parse('200002020202 1', precision='foo'))
+    assert "precision must be one of" in str(exc_info.value)
+    assert ("got %r" % 'foo') in str(exc_info.value)
+
+    with pytest.raises(TimestampError) as exc_info:
+        list(parse('-'))
+    assert str(exc_info.value) == "invalid timestamp: %r" % '-'
+
+    # month must be in 1..12 (from datetime)
+    with pytest.raises(TimestampError):
+        list(parse('200013020202'))
+
+    # month must be in 1..12 (from datetime)
+    with pytest.raises(TimestampError):
+        list(parse('200001020202 200013020202'))
+
+    # minute must be in 0..59 (from datetime)
+    with pytest.raises(TimestampError):
+        list(parse('200001020202 61'))
+
+    # day is out of range for month (from datetime)
+    with pytest.raises(TimestampError):
+        list(parse('200002300202'))
+
+    with pytest.raises(TimestampError) as exc_info:
+        list(parse('200002020202 200002020201'))
+    assert str(exc_info.value) == "can't go backwards: %r" % '200002020201'
 
