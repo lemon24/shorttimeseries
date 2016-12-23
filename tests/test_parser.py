@@ -52,9 +52,6 @@ fill_timestamp_data = [
     (initial, Timestamp(hour=1), Timestamp(2000, 2, 3, 1, 0, 0)),
     (initial, Timestamp(day=1), Timestamp(2000, 3, 1, 0, 0, 0)),
     (initial, Timestamp(month=1), Timestamp(2001, 1, 1, 0, 0, 0)),
-    pytest.mark.xfail(
-        (initial, Timestamp(year=1999), Timestamp()),
-        raises=ValueError, strict=True), # can't go backwards
 
     # rollover (e.g. initial minute=59,second=2 and input second=1)
     (initial._replace(minute=59), Timestamp(second=1), Timestamp(2000, 2, 2, 3, 0, 1)),
@@ -64,17 +61,26 @@ fill_timestamp_data = [
     (initial_last, Timestamp(second=1), Timestamp(2001, 1, 1, 0, 0, 1)),
     (initial_last, Timestamp(minute=1), Timestamp(2001, 1, 1, 0, 1, 0)),
     (initial_last, Timestamp(hour=1), Timestamp(2001, 1, 1, 1, 0, 0)),
-
-    pytest.mark.xfail(
-        (initial._replace(year=2001, day=29), Timestamp(hour=1), Timestamp()),
-        raises=ValueError),     # FIXME: wrap the exception from datetime
-
 ]
 
 
 @pytest.mark.parametrize('initial, input, expected', fill_timestamp_data)
 def test_fill_timestamp(initial, input, expected):
     assert fill_timestamp(initial, pad_timestamp(input)) == expected
+
+
+def test_fill_timestamp_errors():
+    # can't go backwards
+    with pytest.raises(ValueError):
+        fill_timestamp(initial, pad_timestamp(Timestamp(year=1999)))
+
+    # can't have gaps
+    with pytest.raises(ValueError):
+        fill_timestamp(initial, Timestamp(minute=1))
+
+    # day is out of range for month (from datetime)
+    with pytest.raises(ValueError):
+        fill_timestamp(initial._replace(year=2001, day=29), pad_timestamp(Timestamp(hour=1)))
 
 
 def test_parse():
@@ -89,11 +95,17 @@ def test_parse():
         (datetime(2000, 2, 2, 3, 1), ''),
     ]
 
+
+def test_parse_errors():
+    # the first timestamp is incomplete and initial not given
     with pytest.raises(ValueError):
         list(parse('1'))
+
+    # initial is incomplete
     with pytest.raises(ValueError):
         list(parse('1', initial='2'))
 
+    # precision must be one of
     with pytest.raises(ValueError):
         list(parse('200002020202 1', precision='foo'))
 
