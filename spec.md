@@ -44,6 +44,8 @@ with no separators and with the most significant parts being optional:
 Timestamps are not time zone aware (i.e. there is no `time-offset` part). All
 other RFC 3339 [restrictions][rfc-3339-restrictions] apply.
 
+Leading zeroes of the leftmost part are optional.
+
 There are currently four precisions: `day`, `hour`, `minute`, and `second`.
 All timestamps in a series must have the same precision.
 
