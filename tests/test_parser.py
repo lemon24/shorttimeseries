@@ -12,11 +12,11 @@ from shorttimeseries.parser import parse, TimestampError
 def test_parse_partial():
     file = io.StringIO("1 12# 123#one #two #")
     assert list(parse_partial(file, 'day')) == [
-        FullTimestamp(Timestamp(None, None, 1, None, None, None), '', '1'),
-        FullTimestamp(Timestamp(None, None, 12, None, None, None), '', '12#'),
-        FullTimestamp(Timestamp(None, 1, 23, None, None, None), 'one', '123#one'),
-        FullTimestamp(Timestamp(None, None, None, None, None, None), 'two', '#two'),
-        FullTimestamp(Timestamp(None, None, None, None, None, None), '', '#'),
+        FullTimestamp(Timestamp(day=1), '', '1'),
+        FullTimestamp(Timestamp(day=12), '', '12#'),
+        FullTimestamp(Timestamp(month=1, day=23), 'one', '123#one'),
+        FullTimestamp(Timestamp(), 'two', '#two'),
+        FullTimestamp(Timestamp(), '', '#'),
     ]
 
 
