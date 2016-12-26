@@ -92,6 +92,27 @@ def parse_partial(file, precision):
         yield FullTimestamp(ts, label, text)
 
 
+def parse_full(file, initial, precision):
+    timestamps = parse_partial(file, precision)
+
+    if not initial:
+        ts = next(timestamps)
+        initial = pad_timestamp(ts.timestamp)
+        if None in initial:
+            raise ValueError(
+                "initial not given and the first timestamp is incomplete: {!r}"
+                .format(ts.text))
+        yield ts._replace(timestamp=initial)
+
+    for ts in timestamps:
+        try:
+            initial = fill_timestamp(initial, pad_timestamp(ts.timestamp))
+        except TimestampError as e:
+            e.timestamp = ts.text
+            raise
+        yield ts._replace(timestamp=initial)
+
+
 def parse(file, initial=None, precision='minute'):
     if initial:
         if isinstance(initial, (text_type, bytes)):
@@ -113,28 +134,10 @@ def parse(file, initial=None, precision='minute'):
                 raise ValueError("initial is not a datetime object: %r" % e)
             initial = pad_timestamp(initial)
 
-    timestamps = parse_partial(file, precision)
-
-    if not initial:
-        ts = next(timestamps)
-        initial = pad_timestamp(ts.timestamp)
-        if None in initial:
-            raise ValueError(
-                "initial not given and the first timestamp is incomplete: {!r}"
-                .format(ts.text))
-        try:
-            yield datetime(*initial), ts.label
-        except ValueError as e:
-            raise TimestampError(str(e), ts.text)
-
+    timestamps = parse_full(file, initial, precision)
     for ts in timestamps:
         try:
-            initial = fill_timestamp(initial, pad_timestamp(ts.timestamp))
-        except TimestampError as e:
-            e.timestamp = ts.text
-            raise
-        try:
-            yield datetime(*initial), ts.label
+            yield datetime(*ts.timestamp), ts.label
         except ValueError as e:
             raise TimestampError(str(e), ts.text)
 
