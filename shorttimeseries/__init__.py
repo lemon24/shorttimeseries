@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from .parser import parse, TimestampError
+from .parser import parse, InvalidTimestamp
 
 
 __all__ = [
-    'parse', 'TimestampError',
+    'parse', 'InvalidTimestamp',
 ]
 
 __version__ = '0.1-dev'

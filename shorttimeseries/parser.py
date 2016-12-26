@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 
 from ._compat import text_type, bytes
 from .utils import split_stream
-
+from .exceptions import InvalidTimestamp
 
 Timestamp = namedtuple('Timestamp', 'year month day hour minute second')
 class Timestamp(Timestamp):
@@ -15,19 +15,6 @@ class Timestamp(Timestamp):
         return super(Timestamp, cls).__new__(cls, year, month, day, hour, minute, second)
 
 FullTimestamp = namedtuple('FullTimestamp', 'timestamp label text')
-
-
-class TimestampError(Exception):
-
-    def __init__(self, message, timestamp=None):
-        super(TimestampError, self).__init__(message)
-        self.timestamp = timestamp
-
-    def __str__(self):
-        message = super(TimestampError, self).__str__()
-        if self.timestamp:
-            message = "{}: {!r}".format(message, self.timestamp)
-        return message
 
 
 TIMESTAMP_RE = re.compile(r'^([0-9]+|[0-9]*(?=#))(?:#([a-zA-Z0-9_-]*))?$')
@@ -84,7 +71,7 @@ def parse_partial(file, precision):
     for text in split_stream(file):
         match = timestamp_re.match(text)
         if not match:
-            raise TimestampError("invalid timestamp", text)
+            raise InvalidTimestamp("invalid timestamp", text)
         ts, label = match.groups(empty)
 
         ts = Timestamp._make(int(ts[s]) if ts[s] else None for s in slices)
@@ -107,7 +94,7 @@ def parse_full(file, initial, precision):
     for ts in timestamps:
         try:
             initial = fill_timestamp(initial, pad_timestamp(ts.timestamp))
-        except TimestampError as e:
+        except InvalidTimestamp as e:
             e.timestamp = ts.text
             raise
         yield ts._replace(timestamp=initial)
@@ -119,7 +106,7 @@ def parse(file, initial=None, precision='minute'):
             initial_str = initial
             try:
                 initial = list(parse_partial(initial, precision))
-            except TimestampError as e:
+            except InvalidTimestamp as e:
                 raise ValueError("initial: %s" % e)
             if len(initial) != 1:
                 raise ValueError("initial is not a valid timestamp: %r" % initial_str)
@@ -139,7 +126,7 @@ def parse(file, initial=None, precision='minute'):
         try:
             yield datetime(*ts.timestamp), ts.label
         except ValueError as e:
-            raise TimestampError(str(e), ts.text)
+            raise InvalidTimestamp(str(e), ts.text)
 
 
 def pad_timestamp(timestamp):
@@ -198,7 +185,7 @@ def fill_timestamp(initial, timestamp):
                 replace_zero = True
                 carry = i
             else:
-                raise TimestampError("can't go backwards", timestamp)
+                raise InvalidTimestamp("can't go backwards", timestamp)
                 # TODO: what do if you *can* go backwards? replace_rest?
             continue
 
@@ -227,7 +214,7 @@ def fill_timestamp(initial, timestamp):
         try:
             parts = (datetime(*parts) + delta).timetuple()[0:6]
         except ValueError as e:
-            raise TimestampError(str(e), timestamp)
+            raise InvalidTimestamp(str(e), timestamp)
 
     return Timestamp._make(parts)
 
