@@ -72,7 +72,7 @@ def test_fill_timestamp(initial, input, expected):
 
 def test_fill_timestamp_errors():
     # can't go backwards
-    with pytest.raises(InvalidTimestamp):
+    with pytest.raises(ValueError):
         fill_timestamp(initial, pad_timestamp(Timestamp(year=1999)))
 
     # can't have gaps
@@ -80,7 +80,7 @@ def test_fill_timestamp_errors():
         fill_timestamp(initial, Timestamp(minute=1))
 
     # day is out of range for month (from datetime)
-    with pytest.raises(InvalidTimestamp):
+    with pytest.raises(ValueError):
         fill_timestamp(initial._replace(year=2001, day=29), pad_timestamp(Timestamp(hour=1)))
 
 

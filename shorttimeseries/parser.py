@@ -94,9 +94,8 @@ def parse_full(file, initial, precision):
     for ts in timestamps:
         try:
             initial = fill_timestamp(initial, pad_timestamp(ts.timestamp))
-        except InvalidTimestamp as e:
-            e.timestamp = ts.text
-            raise
+        except ValueError as e:
+            raise InvalidTimestamp(str(e), timestamp=ts.text)
         yield ts._replace(timestamp=initial)
 
 
@@ -185,7 +184,7 @@ def fill_timestamp(initial, timestamp):
                 replace_zero = True
                 carry = i
             else:
-                raise InvalidTimestamp("can't go backwards", timestamp)
+                raise ValueError("can't go backwards")
                 # TODO: what do if you *can* go backwards? replace_rest?
             continue
 
@@ -211,10 +210,7 @@ def fill_timestamp(initial, timestamp):
         else:
             assert False, "shouldn't get here"
 
-        try:
-            parts = (datetime(*parts) + delta).timetuple()[0:6]
-        except ValueError as e:
-            raise InvalidTimestamp(str(e), timestamp)
+        parts = (datetime(*parts) + delta).timetuple()[0:6]
 
     return Timestamp._make(parts)
 
