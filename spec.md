@@ -46,9 +46,6 @@ other RFC 3339 [restrictions][rfc-3339-restrictions] apply.
 
 Leading zeroes of the leftmost part are optional.
 
-There are currently four precisions: `day`, `hour`, `minute`, and `second`.
-All timestamps in a series must have the same precision.
-
 Timestamps may be followed by a number sign ("#") and an optional label. When
 the number sign is written, the actual timestamp part may be omitted.
 
@@ -62,6 +59,17 @@ number sign and label are missing, the label is a zero-length string.
 Timestamps are separated by one or more ASCII white space characters:
 
     whitespace          = 1*( SP / HTAB / LF / CR / %x0B / %x0C )
+
+
+Timestamp precision
+-------------------
+
+Timestamps have one of four precisions: `day`, `hour`, `minute`, or `second`.
+
+All timestamps in a series must have the same precision.
+
+When converting a timestamp to a full date, parts below its precision should
+have the lowest possible value for that part.
 
 
 
